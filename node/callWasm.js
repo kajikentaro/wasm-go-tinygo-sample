@@ -1,40 +1,37 @@
 require("./wasm_exec_tiny");
-const fs = require("fs")
+const fs = require("fs");
 
-async function callWasm(...args){
-  return new Promise((resolve)=>{
-    const go = new Go();
+async function callWasm() {
+  const go = new Go();
 
-    WebAssembly.instantiate(fs.readFileSync("./wasmbin"), go.importObject).then(function (obj) {
-      let wasm = obj.instance;
-      let addr = insertText("1", wasm)
-      console.log(wasm.exports.readBuffer(addr));
-      addr = insertText("Firer5", wasm)
-      console.log(wasm.exports.readBuffer(addr));
-      addr = insertText("Fire", wasm)
-      console.log(wasm.exports.readBuffer(addr));
-      resolve();
-    })
-  })
+  const obj = await WebAssembly.instantiate(
+    fs.readFileSync("./wasmbin"),
+    go.importObject
+  );
+  const wasm = obj.instance;
+
+  // GoにStringを渡す
+  const text = "Hello World!";
+  let addr = insertText(text, wasm);
+  const result = wasm.exports.stringFromJS(addr, text.length);
+  console.log(result);
 }
-
 
 // https://www.alcarney.me/blog/2020/passing-strings-between-tinygo-wasm/
 function insertText(text, module) {
+  // Get the address of the writable memory.
+  const addr = module.exports.getBuffer();
+  const buffer = module.exports.memory.buffer;
 
-   // Get the address of the writable memory.
-   let addr = module.exports.getBuffer()
-   let buffer = module.exports.memory.buffer
+  const mem = new Int8Array(buffer);
+  const view = mem.subarray(addr, addr + text.length);
 
-   let mem = new Int8Array(buffer)
-   let view = mem.subarray(addr, addr + text.length)
+  for (let i = 0; i < text.length; i++) {
+    view[i] = text.charCodeAt(i);
+  }
 
-   for (let i = 0; i < text.length; i++) {
-      view[i] = text.charCodeAt(i)
-   }
-
-   // Return the address we started at.
-   return addr
+  // Return the address we started at.
+  return addr;
 }
 
-callWasm()
+callWasm();
