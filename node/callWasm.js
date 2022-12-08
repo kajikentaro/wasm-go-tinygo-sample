@@ -10,15 +10,35 @@ async function callWasm() {
   );
   const wasm = obj.instance;
 
-  // GoにStringを渡す
-  const text = "Hello World!";
-  let addr = insertText(text, wasm);
-  const result = wasm.exports.stringFromJS(addr, text.length);
-  console.log(result);
+  {
+    // GoにStringを渡す
+    const text = "Hello World!";
+    const [addr, length] = writeBuffer(text, wasm);
+    const result = wasm.exports.stringFromJS(addr, length);
+    console.log(result); // Example: 文字数が帰ってくるように実装
+    // Output: 12
+  }
+
+  {
+    // GoからStringをもらう
+    const addr = wasm.exports.stringToJS();
+    const length = wasm.exports.getBufSize();
+    const result = readBuffer(addr, length, wasm);
+    console.log(result);
+    // Output: Sample Str
+  }
 }
 
-// https://www.alcarney.me/blog/2020/passing-strings-between-tinygo-wasm/
-function insertText(text, module) {
+// 共有メモリを読み込む
+function readBuffer(addr, size, module) {
+  let memory = module.exports.memory;
+  let bytes = memory.buffer.slice(addr, addr + size);
+  let text = String.fromCharCode.apply(null, new Int8Array(bytes));
+  return text;
+}
+
+// 共有メモリに書き込む
+function writeBuffer(text, module) {
   // Get the address of the writable memory.
   const addr = module.exports.getBuffer();
   const buffer = module.exports.memory.buffer;
@@ -31,7 +51,11 @@ function insertText(text, module) {
   }
 
   // Return the address we started at.
-  return addr;
+  return [addr, text.length];
 }
 
 callWasm();
+
+// 参考
+// https://www.alcarney.me/blog/2020/passing-strings-between-tinygo-wasm/
+// https://github.com/tinygo-org/tinygo/issues/3010
