@@ -1,7 +1,11 @@
 以下コマンドを実行してコンパイル
 
 ```
-tinygo build -o wasmbin -target wasm optimizeMotion.go
+tinygo build -o wasmbin -target wasm main.go
 ```
 
-生成された`wasmbin`を移動させる
+以下コマンドで実行
+
+```
+node ./main.js
+```
