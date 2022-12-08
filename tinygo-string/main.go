@@ -9,7 +9,7 @@ var buf [1024]byte
 var bufSize uint32
 
 //export stringToJS
-func stringToJS(person string) uint32 {
+func stringToJS() uint32 {
 	ptr, size := stringToPtr("Sample Str")
 	bufSize = size
 	return ptr
