@@ -1,7 +1,11 @@
 ## Go の Wasm を Node.js から呼び出すテスト
 
-解説記事:
+解説記事:  
+その 1  
 https://kajindowsxp.com/go-tinygo-webassembly/
+
+その 2  
+https://kajindowsxp.com/go-tinygo-webassembly-string/
 
 Go 言語を WebAssembly にコンパイルし、Node.js から呼び出すサンプルコード。
 
