@@ -1,6 +1,6 @@
 build:
-	tinygo build -o wasmbin -target wasm optimizeMotion.go
+	tinygo build -o wasmbin -target wasm main.go
 
 run:
-	node ./node/callwasm.js
+	node ./main.js
 
